@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO</title>
+    <style>
+     .typingPanel {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+     }
+     .input {
+        width: 100%;
+     }
+    </style>
+  </head>
+  <body>
+    <ul id="messagesList">
+        
+    </ul>
+   <div class="typingPanel">
+    <div style="display: flex; margin: 20px;">
+        <input id="msgInput" class="input" autocomplete="off" /><button id="sendBtn">SEND</button>
+    </div>
+    <div style="display: flex; margin: 20px;">
+        <input id="roomInput" class="input" autocomplete="off" /><button id="joinBtn">JOIN</button>
+    </div>
+   </div>
+   <script src="https://cdn.socket.io/4.7.2/socket.io.min.js" integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz" crossorigin="anonymous"></script>
+   <script>
+    var io = io('http://localhost:1010');
+    const msgInput = document.getElementById('msgInput')
+    const roomInput = document.getElementById('roomInput')
+    const sendBtn = document.getElementById('sendBtn')
+    const joinBtn = document.getElementById('joinBtn')
+    const messagesList = document.getElementById('messagesList')
+    io.on('connection', (socket) => {
+        console.log('======> connected: ', socket.id)
+    });
+    sendBtn.addEventListener('click', () => {
+        if (!msgInput.value) return
+        io.emit('send', msgInput.value, roomInput.value)
+        msgInput.value = ''
+    })
+    io.on('received', (msg) => {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            messagesList.appendChild(item);
+        });
+        joinBtn.addEventListener('click', () => {
+            if (!roomInput.value) return
+            io.emit('joinRoom', roomInput.value, (room) => { console.log('connected ', room) })
+        })
+   </script>
+  </body>
+
+</html>
